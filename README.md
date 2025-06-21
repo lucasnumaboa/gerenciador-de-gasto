@@ -32,8 +32,8 @@ pip install -r requirements.txt
    ```
    DB_HOST=127.0.0.1
    DB_PORT=3306
-   DB_USER=acore
-   DB_PASSWORD=acore
+   DB_USER=user
+   DB_PASSWORD=password
    DB_NAME=expense_tracker
    ```
 
@@ -59,6 +59,21 @@ http://localhost:5000
 - `routes.py` - Rotas e controladores da aplicação
 - `templates/` - Arquivos HTML da interface
 - `static/` - Arquivos CSS, JavaScript e imagens
+
+
+
+## Demonstrações
+
+### Dashboard e Relatórios
+
+![Dashboard](https://github.com/lucasnumaboa/gerenciador-de-gasto/raw/main/references/1.JPG)
+![Relatórios](https://github.com/lucasnumaboa/gerenciador-de-gasto/raw/main/references/2.JPG)
+
+### 📺 Vídeo Demonstrativo
+
+[🎥 Ver vídeo de demonstração](https://github.com/lucasnumaboa/gerenciador-de-gasto/raw/main/references/Relatórios%20Financeiros%20-%20Google%20Chrome%202025-06-21%2011-18-52.mp4)
+
+
 
 ## Uso
 
