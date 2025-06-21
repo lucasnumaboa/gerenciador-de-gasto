@@ -2,6 +2,14 @@
 
 Um sistema web completo para gerenciar suas finanças pessoais, controlar despesas, receitas e investimentos.
 
+## 🔥 Demo
+
+Acesse a demonstração do sistema funcionando:
+
+👉 [https://gasto-maneiro.manerostream.com.br/](https://gasto-maneiro.manerostream.com.br/)
+
+
+
 ## Funcionalidades
 
 - Cadastro e autenticação de usuários
@@ -71,7 +79,7 @@ http://localhost:5000
 
 ### 📺 Vídeo Demonstrativo
 
-[🎥 Ver vídeo de demonstração](https://github.com/lucasnumaboa/gerenciador-de-gasto/raw/main/references/Relatórios%20Financeiros%20-%20Google%20Chrome%202025-06-21%2011-18-52.mp4)
+[🎥 demonstração](https://github.com/lucasnumaboa/gerenciador-de-gasto/raw/main/references/Relatórios%20Financeiros%20-%20Google%20Chrome%202025-06-21%2011-18-52.gif)
 
 
 
