@@ -77,10 +77,8 @@ http://localhost:5000
 ![Dashboard](https://github.com/lucasnumaboa/gerenciador-de-gasto/raw/main/references/1.JPG)
 ![Relatórios](https://github.com/lucasnumaboa/gerenciador-de-gasto/raw/main/references/2.JPG)
 
-### 📺 Vídeo Demonstrativo
-
-[🎥 demonstração](https://github.com/lucasnumaboa/gerenciador-de-gasto/raw/main/references/Relatórios%20Financeiros%20-%20Google%20Chrome%202025-06-21%2011-18-52.gif)
-
+### 📺 Vídeo Demonstrativo relatório
+![Demonstração](https://github.com/lucasnumaboa/gerenciador-de-gasto/raw/main/references/Relatórios%20Financeiros%20-%20Google%20Chrome%202025-06-21%2011-18-52.gif)
 
 
 ## Uso
