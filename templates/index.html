@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mt-5">
+    <div class="col-md-8 offset-md-2 text-center">
+        <h1 class="display-4 mb-4">Sistema de Controle de Gastos e Investimentos</h1>
+        <p class="lead mb-5">Gerencie suas finanças pessoais de forma simples e eficiente. Acompanhe despesas, receitas e investimentos em um só lugar.</p>
+        
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-user-plus fa-4x mb-3 text-primary"></i>
+                        <h3>Novo por aqui?</h3>
+                        <p class="mb-4">Crie uma conta para começar a controlar suas finanças.</p>
+                        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Registrar</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-sign-in-alt fa-4x mb-3 text-success"></i>
+                        <h3>Já tem uma conta?</h3>
+                        <p class="mb-4">Faça login para acessar seu painel financeiro.</p>
+                        <a href="{{ url_for('login') }}" class="btn btn-success btn-lg">Entrar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card-deck">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body text-center py-4">
+                            <i class="fas fa-money-bill-wave fa-3x mb-3 text-primary"></i>
+                            <h4>Controle de Despesas</h4>
+                            <p>Registre e categorize todas as suas despesas para saber exatamente para onde seu dinheiro está indo.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body text-center py-4">
+                            <i class="fas fa-chart-line fa-3x mb-3 text-primary"></i>
+                            <h4>Acompanhamento de Investimentos</h4>
+                            <p>Monitore seus investimentos e acompanhe o crescimento do seu patrimônio ao longo do tempo.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body text-center py-4">
+                            <i class="fas fa-chart-pie fa-3x mb-3 text-primary"></i>
+                            <h4>Relatórios e Gráficos</h4>
+                            <p>Visualize suas finanças através de gráficos e relatórios detalhados para tomar melhores decisões.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

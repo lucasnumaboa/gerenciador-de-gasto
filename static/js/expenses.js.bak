@@ -1,0 +1,54 @@
+document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos do tipo de despesa
+    const expenseTypeSingle = document.getElementById('expense_type_single');
+    const expenseTypeRecurring = document.getElementById('expense_type_recurring');
+    const expenseTypeInstallment = document.getElementById('expense_type_installment');
+    
+    // Containers de campos específicos
+    const recurringFields = document.getElementById('recurring_fields');
+    const installmentFields = document.getElementById('installment_fields');
+    
+    // Campos obrigatórios para cada tipo
+    const recurringEndDate = document.getElementById('recurring_end_date');
+    const totalInstallments = document.getElementById('total_installments');
+    
+    // Função para atualizar a visibilidade dos campos
+    function updateFieldsVisibility() {
+        // Esconder todos os campos específicos primeiro
+        recurringFields.classList.add('d-none');
+        installmentFields.classList.add('d-none');
+        
+        // Remover atributo required de todos os campos específicos
+        recurringEndDate.removeAttribute('required');
+        totalInstallments.removeAttribute('required');
+        
+        // Mostrar campos específicos de acordo com o tipo selecionado
+        if (expenseTypeRecurring.checked) {
+            recurringFields.classList.remove('d-none');
+            recurringEndDate.setAttribute('required', 'required');
+            
+            // Definir data final padrão como 1 ano a partir da data atual
+            const currentDate = new Date(document.getElementById('date').value);
+            const oneYearLater = new Date(currentDate);
+            oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+            
+            // Formatar a data para o formato YYYY-MM-DD
+            const formattedDate = oneYearLater.toISOString().split('T')[0];
+            recurringEndDate.value = formattedDate;
+        }
+        
+        if (expenseTypeInstallment.checked) {
+            installmentFields.classList.remove('d-none');
+            totalInstallments.setAttribute('required', 'required');
+        }
+    }
+    
+    // Adicionar event listeners para os radio buttons
+    expenseTypeSingle.addEventListener('change', updateFieldsVisibility);
+    expenseTypeRecurring.addEventListener('change', updateFieldsVisibility);
+    expenseTypeInstallment.addEventListener('change', updateFieldsVisibility);
+    
+    // Inicializar a visibilidade dos campos
+    updateFieldsVisibility();
+});

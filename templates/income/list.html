@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}Receitas - Sistema de Controle de Gastos e Investimentos{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-hand-holding-usd me-2"></i>Receitas</h2>
+        <p class="lead">Gerencie suas receitas e acompanhe seus ganhos.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('income.add_income') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Nova Receita
+            </a>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                <i class="fas fa-file-export me-1"></i>Exportar
+            </button>
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#importModal">
+                <i class="fas fa-file-import me-1"></i>Importar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Filtros</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{{ url_for('income.income_list') }}" class="row g-3 filter-form">
+                    <div class="col-md-3">
+                        <label for="source" class="form-label">Fonte</label>
+                        <select class="form-select" id="source" name="source_id">
+                            <option value="">Todas</option>
+                            {% for source in sources %}
+                            <option value="{{ source.id }}" {% if request.args.get('source_id')|int == source.id %}selected{% endif %}>
+                                {{ source.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="start_date" class="form-label">Data Inicial</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="end_date" class="form-label">Data Final</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                        <a href="{{ url_for('income.income_list') }}" class="btn btn-secondary">Limpar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Lista de Receitas</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Fonte</th>
+                                <th>Descrição</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if income_entries %}
+                                {% for income in income_entries %}
+                                <tr>
+                                    <td>{{ income.date.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ income.source_name }}</td>
+                                    <td>{{ income.description }}</td>
+                                    <td class="text-end">R$ {{ income.amount }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ url_for('income.edit_income', id=income.id) }}" class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ income.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                        
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ income.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ income.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ income.id }}">Confirmar Exclusão</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Tem certeza que deseja excluir a receita "{{ income.description }}" no valor de R$ {{ income.amount }}?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <a href="{{ url_for('income.delete_income', id=income.id) }}" class="btn btn-danger">Excluir</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Nenhuma receita encontrada.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <th colspan="3" class="text-end">Total:</th>
+                                <th class="text-end">
+                                    R$ {{ '%0.2f'|format(total_income|float) }}
+                                </th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Evolução de Receitas</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="incomeChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">Exportar Receitas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form action="{{ url_for('income.export_income') }}" method="post">
+                <div class="modal-body">
+                    <p>Selecione o formato de exportação:</p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="export_format" id="formatExcel" value="excel" checked>
+                        <label class="form-check-label" for="formatExcel">
+                            Excel (.xlsx)
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Exportar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Importar Receitas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form action="{{ url_for('income.import_income') }}" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <p>Selecione o arquivo Excel (.xlsx) com as receitas a serem importadas:</p>
+                    <div class="mb-3">
+                        <label for="importFile" class="form-label">Arquivo</label>
+                        <input class="form-control" type="file" id="importFile" name="import_file" accept=".xlsx" required>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>O arquivo deve conter as colunas: Fonte, Valor, Descrição e Data.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Importar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Monthly Income Chart
+        fetch('{{ url_for("income.api_monthly_income") }}')
+            .then(response => response.json())
+            .then(data => {
+                const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                const incomeData = Array(12).fill(0);
+                
+                data.forEach(item => {
+                    incomeData[item.month - 1] = item.total;
+                });
+                
+                const incomeChart = new Chart(
+                    document.getElementById('incomeChart'),
+                    {
+                        type: 'bar',
+                        data: {
+                            labels: months,
+                            datasets: [
+                                {
+                                    label: 'Receitas',
+                                    data: incomeData,
+                                    backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                    borderColor: 'rgba(40, 167, 69, 1)',
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return 'R$ ' + value;
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Receitas por Mês (Ano Atual)'
+                                }
+                            }
+                        }
+                    }
+                );
+            });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Sistema de Controle de Gastos e Investimentos{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Removed custom col-md-20p class as we're using standard Bootstrap grid */
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h2>
+        <p class="lead">Bem-vindo(a), {{ session.full_name }}! Confira o resumo das suas finanças.</p>
+    </div>
+</div>
+
+<!-- First row with Saldo Mensal and Despesas de Hoje -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-wallet me-2"></i>Saldo Mensal</h5>
+                <div class="display-4 mt-3">
+                    <!-- Debug: Calculando saldo -->
+                    {% set income_value = 0 %}
+                    {% set expense_value = 0 %}
+                    
+                    {% if monthly_income and monthly_income[0].total is not none %}
+                        {% set income_value = monthly_income[0].total|float %}
+                    {% endif %}
+                    
+                    {% if monthly_expenses and monthly_expenses[0].total is not none %}
+                        {% set expense_value = monthly_expenses[0].total|float %}
+                    {% endif %}
+                    
+                    R$ {{ (income_value - expense_value)|round(2) }}
+                </div>
+                <p class="card-text mt-2">Receitas - Despesas do mês atual</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-warning text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-calendar-day me-2"></i>Despesas de Hoje</h5>
+                <div class="display-4 mt-3">
+                    R$ {{ today_expenses|float|round(2) }}
+                </div>
+                <p class="card-text mt-2">Total de despesas do dia atual</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Second row with remaining cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-danger text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-money-bill-wave me-2"></i>Despesas</h5>
+                <div class="display-4 mt-3">
+                    <!-- Debug: {{ monthly_expenses }} -->
+                    {% if total_expenses_value is defined %}
+                        R$ {{ total_expenses_value|float|round(2) }}
+                    {% elif monthly_expenses and monthly_expenses[0].total is not none %}
+                        R$ {{ monthly_expenses[0].total|float|round(2) }}
+                    {% else %}
+                        R$ 0.00
+                    {% endif %}
+                </div>
+                <p class="card-text mt-2">Total de despesas do mês atual</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-hand-holding-usd me-2"></i>Receitas</h5>
+                <div class="display-4 mt-3">
+                    <!-- Debug: {{ monthly_income }} -->
+                    {% if monthly_income and monthly_income[0].total is not none %}
+                        R$ {{ monthly_income[0].total|float|round(2) }}
+                    {% else %}
+                        R$ 0.00
+                    {% endif %}
+                </div>
+                <p class="card-text mt-2">Total de receitas do mês atual</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-chart-line me-2"></i>Total Investido</h5>
+                <div class="display-4 mt-3">
+                    R$ {{ total_investments|float|round(2) }}
+                </div>
+                <p class="card-text mt-2">Valor total em investimentos</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Despesas por Categoria</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="expenseCategoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Receitas x Despesas</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="incomeExpenseChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Despesas Recentes</h5>
+                <a href="{{ url_for('expenses.expenses_list') }}" class="btn btn-sm btn-primary">Ver Todas</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th class="text-end">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_expenses %}
+                                {% for expense in recent_expenses %}
+                                <tr>
+                                    <td>{{ expense.date.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ expense.category_name }}</td>
+                                    <td>{{ expense.description }}</td>
+                                    <td class="text-end">R$ {{ expense.amount }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Nenhuma despesa registrada.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Investimentos Recentes</h5>
+                <a href="{{ url_for('investments.investments_list') }}" class="btn btn-sm btn-primary">Ver Todos</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th class="text-end">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_investments %}
+                                {% for investment in recent_investments %}
+                                <tr>
+                                    <td>{{ investment.date.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ investment.type_name }}</td>
+                                    <td>{{ investment.description }}</td>
+                                    <td class="text-end">R$ {{ investment.amount }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Nenhum investimento registrado.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Expense Category Chart
+        const expenseCategoryData = {{ expense_categories|tojson }};
+        if (expenseCategoryData.length > 0) {
+            const categoryLabels = expenseCategoryData.map(function(item) { return item.name; });
+            const categoryValues = expenseCategoryData.map(function(item) { return item.total; });
+            
+            const expenseCategoryChart = new Chart(
+                document.getElementById('expenseCategoryChart'),
+                {
+                    type: 'pie',
+                    data: {
+                        labels: categoryLabels,
+                        datasets: [{
+                            data: categoryValues,
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                                '#FF9F40', '#8AC249', '#EA526F', '#23B5D3', '#279AF1'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Despesas por Categoria (Mês Atual)'
+                            }
+                        }
+                    }
+                }
+            );
+        }
+        
+        // Income vs Expense Chart
+        const monthlyExpensesData = {{ monthly_expenses_data|tojson }};
+        const monthlyIncomeData = {{ monthly_income_data|tojson }};
+        
+        if (monthlyExpensesData.length > 0 || monthlyIncomeData.length > 0) {
+            const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            const expenseData = Array(12).fill(0);
+            const incomeData = Array(12).fill(0);
+            
+            // Processar despesas mensais (incluindo recorrentes)
+            monthlyExpensesData.forEach(function(item) {
+                if (item.month >= 1 && item.month <= 12) {
+                    expenseData[item.month - 1] = parseFloat(item.total);
+                }
+            });
+            
+            // Processar receitas mensais
+            monthlyIncomeData.forEach(function(item) {
+                if (item.month >= 1 && item.month <= 12) {
+                    incomeData[item.month - 1] = parseFloat(item.total);
+                }
+            });
+            
+            console.log('Dados de despesas por mês:', expenseData);
+            console.log('Dados de receitas por mês:', incomeData);
+            
+            const incomeExpenseChart = new Chart(
+                document.getElementById('incomeExpenseChart'),
+                {
+                    type: 'bar',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: 'Receitas',
+                                data: incomeData,
+                                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Despesas',
+                                data: expenseData,
+                                backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                                borderColor: 'rgba(220, 53, 69, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value;
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Receitas x Despesas (Ano Atual)'
+                            }
+                        }
+                    }
+                }
+            );
+        }
+    });
+</script>
+{% endblock %}

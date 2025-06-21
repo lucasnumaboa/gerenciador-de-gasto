@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Despesa - Sistema de Controle de Gastos e Investimentos{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="fas fa-plus-circle me-2"></i>Adicionar Despesa</h2>
+        <p class="lead">Registre uma nova despesa no sistema.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Formulário de Despesa</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('expenses.add_expense') }}">
+                    <!-- Tipo de despesa -->
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Despesa</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="expense_type" id="expense_type_single" value="single" checked>
+                            <label class="form-check-label" for="expense_type_single">
+                                Despesa Única
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="expense_type" id="expense_type_recurring" value="recurring">
+                            <label class="form-check-label" for="expense_type_recurring">
+                                Despesa Recorrente
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="expense_type" id="expense_type_installment" value="installment">
+                            <label class="form-check-label" for="expense_type_installment">
+                                Despesa Parcelada
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Campos comuns -->
+                    <div class="mb-3">
+                        <label for="category_id" class="form-label">Categoria</label>
+                        <select class="form-select" id="category_id" name="category_id" required>
+                            <option value="">Selecione uma categoria</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Valor Total (R$)</label>
+                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Data</label>
+                        <input type="date" class="form-control" id="date" name="date" value="{{ now.strftime('%Y-%m-%d') }}" required>
+                    </div>
+
+                    <!-- Campos para despesa recorrente -->
+                    <div id="recurring_fields" class="d-none">
+                        <div class="mb-3">
+                            <label for="recurring_type" class="form-label">Tipo de Recorrência</label>
+                            <select class="form-select" id="recurring_type" name="recurring_type">
+                                <option value="monthly">Mensal</option>
+                                <option value="yearly">Anual</option>
+                                <option value="weekly">Semanal</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recurring_end_date" class="form-label">Data Final da Recorrência</label>
+                            <input type="date" class="form-control" id="recurring_end_date" name="recurring_end_date">
+                        </div>
+                    </div>
+
+                    <!-- Campos para despesa parcelada -->
+                    <div id="installment_fields" class="d-none">
+                        <div class="mb-3">
+                            <label for="total_installments" class="form-label">Número de Parcelas</label>
+                            <input type="number" class="form-control" id="total_installments" name="total_installments" min="2" value="2">
+                        </div>
+                        <div class="alert alert-info">
+                            <small>O valor total será dividido igualmente entre as parcelas. As parcelas serão mensais.</small>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('expenses.expenses_list') }}" class="btn btn-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+                
+                <script>
+                    // Quando o documento estiver carregado
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Elementos do tipo de despesa
+                        const expenseTypeSingle = document.getElementById('expense_type_single');
+                        const expenseTypeRecurring = document.getElementById('expense_type_recurring');
+                        const expenseTypeInstallment = document.getElementById('expense_type_installment');
+                        
+                        // Containers de campos específicos
+                        const recurringFields = document.getElementById('recurring_fields');
+                        const installmentFields = document.getElementById('installment_fields');
+                        
+                        // Campos obrigatórios para cada tipo
+                        const recurringEndDate = document.getElementById('recurring_end_date');
+                        const totalInstallments = document.getElementById('total_installments');
+                        
+                        // Função para atualizar a visibilidade dos campos
+                        function updateFieldsVisibility() {
+                            // Esconder todos os campos específicos primeiro
+                            recurringFields.classList.add('d-none');
+                            installmentFields.classList.add('d-none');
+                            
+                            // Remover atributo required de todos os campos específicos
+                            recurringEndDate.removeAttribute('required');
+                            totalInstallments.removeAttribute('required');
+                            
+                            // Mostrar campos específicos de acordo com o tipo selecionado
+                            if (expenseTypeRecurring.checked) {
+                                recurringFields.classList.remove('d-none');
+                                recurringEndDate.setAttribute('required', 'required');
+                            }
+                            
+                            if (expenseTypeInstallment.checked) {
+                                installmentFields.classList.remove('d-none');
+                                totalInstallments.setAttribute('required', 'required');
+                            }
+                        }
+                        
+                        // Adicionar event listeners para os radio buttons
+                        expenseTypeSingle.addEventListener('change', updateFieldsVisibility);
+                        expenseTypeRecurring.addEventListener('change', updateFieldsVisibility);
+                        expenseTypeInstallment.addEventListener('change', updateFieldsVisibility);
+                        
+                        // Inicializar a visibilidade dos campos
+                        updateFieldsVisibility();
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

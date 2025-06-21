@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório Financeiro - {{ month_name }} {{ year }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-section {
+        margin-bottom: 2rem;
+    }
+    .chart-container {
+        margin: 1.5rem 0;
+        text-align: center;
+    }
+    .chart-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .ai-analysis {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .ai-analysis h2 {
+        color: #0d6efd;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .ai-analysis h3 {
+        color: #198754;
+        font-size: 1.25rem;
+        margin-top: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    .ai-analysis ul {
+        margin-bottom: 1rem;
+    }
+    .ai-analysis li {
+        margin-bottom: 0.5rem;
+    }
+    .report-header {
+        background: linear-gradient(135deg, #0d6efd, #6610f2);
+        color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .report-header h1 {
+        margin-bottom: 0.5rem;
+    }
+    .report-header p {
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    .chart-title {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        color: #495057;
+    }
+    .print-btn {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1000;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    @media print {
+        .navbar, .footer, .print-btn {
+            display: none !important;
+        }
+        .container {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        .report-header {
+            background: #f8f9fa !important;
+            color: #212529 !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="report-header">
+        <h1>Relatório Financeiro</h1>
+        <p>{{ month_name }} de {{ year }}</p>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="row report-section">
+        {% if charts.income_vs_expenses %}
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Visão Geral</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <h6 class="chart-title">Receitas vs Despesas vs Investimentos</h6>
+                        <img src="data:image/png;base64,{{ charts.income_vs_expenses }}" alt="Receitas vs Despesas vs Investimentos" class="chart-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="col-md-6 mb-4">
+            {% if charts.expenses_by_category %}
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Despesas por Categoria</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <img src="data:image/png;base64,{{ charts.expenses_by_category }}" alt="Despesas por Categoria" class="chart-img">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            {% if charts.investments_by_type %}
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Investimentos por Tipo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <img src="data:image/png;base64,{{ charts.investments_by_type }}" alt="Investimentos por Tipo" class="chart-img">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if charts.budget_vs_actual %}
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Orçamento vs Despesas Reais</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <img src="data:image/png;base64,{{ charts.budget_vs_actual }}" alt="Orçamento vs Despesas Reais" class="chart-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- AI Analysis Section -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Análise Financeira</h5>
+        </div>
+        <div class="card-body">
+            <div class="ai-analysis">
+                {{ report|safe }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Print Button -->
+    <button class="btn btn-primary btn-lg rounded-circle print-btn" onclick="window.print()">
+        <i class="fas fa-print"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any additional JavaScript for the report page here
+    document.addEventListener('DOMContentLoaded', function() {
+        // You can add any interactive features for the report here
+    });
+</script>
+{% endblock %}

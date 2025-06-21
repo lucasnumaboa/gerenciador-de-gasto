@@ -1,0 +1,172 @@
+{% block title %}Despesas - Sistema de Controle de Gastos e Investimentos{% endblock %}
+{% extends 'base.html' %}
+
+{% block title %}Despesas - Sistema de Controle de Gastos e Investimentos{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-money-bill-wave me-2"></i>Despesas</h2>
+        <p class="lead">Gerencie suas despesas e acompanhe seus gastos.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('expenses.add_expense') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Nova Despesa
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Filtros</h5>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{{ url_for('expenses.expenses_list') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="category" class="form-label">Categoria</label>
+                        <select class="form-select" id="category" name="category_id">
+                            <option value="">Todas</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if request.args.get('category_id')|int == category.id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="expense_type" class="form-label">Tipo de Despesa</label>
+                        <select class="form-select" id="expense_type" name="expense_type">
+                            <option value="">Todos</option>
+                            <option value="single" {% if request.args.get('expense_type') == 'single' %}selected{% endif %}>Única</option>
+                            <option value="recurring" {% if request.args.get('expense_type') == 'recurring' %}selected{% endif %}>Recorrente</option>
+                            <option value="installment" {% if request.args.get('expense_type') == 'installment' %}selected{% endif %}>Parcelada</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="start_date" class="form-label">Data Inicial</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="end_date" class="form-label">Data Final</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                        <a href="{{ url_for('expenses.expenses_list') }}" class="btn btn-secondary">Limpar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Lista de Despesas</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th>Tipo</th>
+                                <th class="text-end">Valor</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if expenses %}
+                                {% for expense in expenses %}
+                                <tr>
+                                    <td>{{ expense.date.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ expense.category_name }}</td>
+                                    <td>
+                                        {{ expense.description }}
+                                        {% if expense.is_installment %}
+                                            <span class="badge bg-info">Parcela {{ expense.installment_number }}/{{ expense.total_installments }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if expense.is_recurring %}
+                                            <span class="badge bg-primary">Recorrente 
+                                                {% if expense.recurring_type == 'monthly' %}Mensal
+                                                {% elif expense.recurring_type == 'yearly' %}Anual
+                                                {% elif expense.recurring_type == 'weekly' %}Semanal
+                                                {% endif %}
+                                            </span>
+                                        {% elif expense.is_installment %}
+                                            <span class="badge bg-info">Parcelada</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Única</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">R$ {{ expense.amount }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ url_for('expenses.edit_expense', id=expense.id) }}" class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ expense.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                        
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ expense.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ expense.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ expense.id }}">Confirmar Exclusão</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Tem certeza que deseja excluir a despesa "{{ expense.description }}" no valor de R$ {{ expense.amount }}?
+                                                        
+                                                        {% if expense.is_recurring and not expense.parent_expense_id %}
+                                                            <div class="form-check mt-3">
+                                                                <input class="form-check-input" type="checkbox" id="deleteAllRecurring{{ expense.id }}" name="delete_all_recurring">
+                                                                <label class="form-check-label" for="deleteAllRecurring{{ expense.id }}">
+                                                                    Excluir todas as ocorrências futuras desta despesa recorrente
+                                                                </label>
+                                                            </div>
+                                                        {% endif %}
+                                                        
+                                                        {% if expense.is_installment and not expense.parent_expense_id %}
+                                                            <div class="form-check mt-3">
+                                                                <input class="form-check-input" type="checkbox" id="deleteAllInstallments{{ expense.id }}" name="delete_all_installments">
+                                                                <label class="form-check-label" for="deleteAllInstallments{{ expense.id }}">
+                                                                    Excluir todas as parcelas futuras desta despesa
+                                                                </label>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <a href="{{ url_for('expenses.delete_expense', id=expense.id) }}" class="btn btn-danger">Excluir</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <p class="text-muted mb-0">Nenhuma despesa encontrada.</p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

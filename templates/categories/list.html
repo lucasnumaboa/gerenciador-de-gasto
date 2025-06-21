@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}Categorias - Sistema de Controle de Gastos e Investimentos{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="fas fa-tags me-2"></i>Categorias e Tipos</h2>
+        <p class="lead">Gerencie categorias de despesas, tipos de investimentos e fontes de receitas.</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Expense Categories -->
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Categorias de Despesas</h5>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExpenseCategoryModal">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% if expense_categories %}
+                        {% for category in expense_categories %}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ category.name }}</h6>
+                                <small class="text-muted">{{ category.description }}</small>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editExpenseCategoryModal{{ category.id }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Edit Expense Category Modal -->
+                        <div class="modal fade" id="editExpenseCategoryModal{{ category.id }}" tabindex="-1" aria-labelledby="editExpenseCategoryModalLabel{{ category.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editExpenseCategoryModalLabel{{ category.id }}">Editar Categoria de Despesa</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="post" action="{{ url_for('categories.edit_expense_category', id=category.id) }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label for="name{{ category.id }}" class="form-label">Nome</label>
+                                                <input type="text" class="form-control" id="name{{ category.id }}" name="name" value="{{ category.name }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="description{{ category.id }}" class="form-label">Descrição</label>
+                                                <textarea class="form-control" id="description{{ category.id }}" name="description" rows="3">{{ category.description }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Salvar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-center">Nenhuma categoria de despesa encontrada.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Investment Types -->
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Tipos de Investimentos</h5>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addInvestmentTypeModal">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% if investment_types %}
+                        {% for type in investment_types %}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ type.name }}</h6>
+                                <small class="text-muted">{{ type.description }}</small>
+                                <span class="badge {% if type.risk_level == 'Low' %}bg-success{% elif type.risk_level == 'Medium' %}bg-warning{% else %}bg-danger{% endif %} ms-2">
+                                    {{ type.risk_level }}
+                                </span>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editInvestmentTypeModal{{ type.id }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Edit Investment Type Modal -->
+                        <div class="modal fade" id="editInvestmentTypeModal{{ type.id }}" tabindex="-1" aria-labelledby="editInvestmentTypeModalLabel{{ type.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editInvestmentTypeModalLabel{{ type.id }}">Editar Tipo de Investimento</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="post" action="{{ url_for('categories.edit_investment_type', id=type.id) }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label for="name{{ type.id }}" class="form-label">Nome</label>
+                                                <input type="text" class="form-control" id="name{{ type.id }}" name="name" value="{{ type.name }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="description{{ type.id }}" class="form-label">Descrição</label>
+                                                <textarea class="form-control" id="description{{ type.id }}" name="description" rows="3">{{ type.description }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="risk_level{{ type.id }}" class="form-label">Nível de Risco</label>
+                                                <select class="form-select" id="risk_level{{ type.id }}" name="risk_level" required>
+                                                    <option value="Low" {% if type.risk_level == 'Low' %}selected{% endif %}>Baixo</option>
+                                                    <option value="Medium" {% if type.risk_level == 'Medium' %}selected{% endif %}>Médio</option>
+                                                    <option value="High" {% if type.risk_level == 'High' %}selected{% endif %}>Alto</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Salvar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-center">Nenhum tipo de investimento encontrado.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Income Sources -->
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Fontes de Receitas</h5>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addIncomeSourceModal">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% if income_sources %}
+                        {% for source in income_sources %}
+                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ source.name }}</h6>
+                                <small class="text-muted">{{ source.description }}</small>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#editIncomeSourceModal{{ source.id }}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Edit Income Source Modal -->
+                        <div class="modal fade" id="editIncomeSourceModal{{ source.id }}" tabindex="-1" aria-labelledby="editIncomeSourceModalLabel{{ source.id }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editIncomeSourceModalLabel{{ source.id }}">Editar Fonte de Receita</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form method="post" action="{{ url_for('categories.edit_income_source', id=source.id) }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label for="name{{ source.id }}" class="form-label">Nome</label>
+                                                <input type="text" class="form-control" id="name{{ source.id }}" name="name" value="{{ source.name }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="description{{ source.id }}" class="form-label">Descrição</label>
+                                                <textarea class="form-control" id="description{{ source.id }}" name="description" rows="3">{{ source.description }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Salvar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="list-group-item">
+                            <p class="mb-0 text-center">Nenhuma fonte de receita encontrada.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Expense Category Modal -->
+<div class="modal fade" id="addExpenseCategoryModal" tabindex="-1" aria-labelledby="addExpenseCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addExpenseCategoryModalLabel">Adicionar Categoria de Despesa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('categories.add_expense_category') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Investment Type Modal -->
+<div class="modal fade" id="addInvestmentTypeModal" tabindex="-1" aria-labelledby="addInvestmentTypeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addInvestmentTypeModalLabel">Adicionar Tipo de Investimento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('categories.add_investment_type') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="risk_level" class="form-label">Nível de Risco</label>
+                        <select class="form-select" id="risk_level" name="risk_level" required>
+                            <option value="Low">Baixo</option>
+                            <option value="Medium">Médio</option>
+                            <option value="High">Alto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Income Source Modal -->
+<div class="modal fade" id="addIncomeSourceModal" tabindex="-1" aria-labelledby="addIncomeSourceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addIncomeSourceModalLabel">Adicionar Fonte de Receita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('categories.add_income_source') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

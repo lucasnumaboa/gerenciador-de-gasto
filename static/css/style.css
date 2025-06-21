@@ -1,0 +1,156 @@
+/* Custom CSS for Expense Tracker Application */
+
+/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Card Styles */
+.card {
+    border-radius: 0.5rem;
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    border-top-left-radius: 0.5rem !important;
+    border-top-right-radius: 0.5rem !important;
+    font-weight: 500;
+}
+
+/* Form Styles */
+.form-control:focus, .form-select:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.btn-success {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-success:hover {
+    background-color: #157347;
+    border-color: #146c43;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+}
+
+/* Table Styles */
+.table {
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+/* Dashboard Styles */
+.display-4 {
+    font-weight: 700;
+}
+
+/* Chart Styles */
+canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .card-deck {
+        display: block;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Custom Animations */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Progress Bar Styles */
+.progress {
+    height: 1.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 0.25rem;
+}
+
+/* Alert Customization */
+.alert {
+    border-radius: 0.25rem;
+    font-weight: 500;
+}
+
+/* Navbar Customization */
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* Login and Register Pages */
+.login-card, .register-card {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* Custom Badge Styles */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}

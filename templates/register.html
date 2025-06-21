@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Registro - Sistema de Controle de Gastos e Investimentos{% endblock %}
+
+{% block content %}
+<div class="row mt-5">
+    <div class="col-md-6 offset-md-3">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Registro</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('register') }}">
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">Nome Completo</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nome de Usuário</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Registrar</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">Já tem uma conta? <a href="{{ url_for('login') }}">Faça login</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Orçamentos - Sistema de Controle de Gastos e Investimentos{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-wallet me-2"></i>Orçamentos</h2>
+        <p class="lead">Gerencie seus orçamentos e controle seus gastos por categoria.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('budgets.add_budget') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Novo Orçamento
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Lista de Orçamentos</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Período</th>
+                                <th class="text-end">Valor Orçado</th>
+                                <th class="text-end">Valor Gasto</th>
+                                <th class="text-center">Progresso</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if budgets %}
+                                {% for budget in budgets %}
+                                <tr>
+                                    <td>{{ budget.category_name }}</td>
+                                    <td>{{ budget.start_date.strftime('%d/%m/%Y') }} - {{ budget.end_date.strftime('%d/%m/%Y') }}</td>
+                                    <td class="text-end">R$ {{ budget.amount }}</td>
+                                    <td class="text-end">
+                                        {% set spent = budget.spent|default(0) %}
+                                        R$ {{ spent }}
+                                    </td>
+                                    <td class="text-center">
+                                        {% set spent = budget.spent|default(0)|float %}
+                                        {% set budget_amount = budget.amount|float %}
+                                        {% set percentage = (spent / budget_amount * 100)|round|int %}
+                                        {% set progress_class = 'bg-success' %}
+                                        {% if percentage > 75 and percentage <= 90 %}
+                                            {% set progress_class = 'bg-warning' %}
+                                        {% elif percentage > 90 %}
+                                            {% set progress_class = 'bg-danger' %}
+                                        {% endif %}
+                                        
+                                        <div class="progress">
+                                            <div class="progress-bar {{ progress_class }}" role="progressbar" style="width: {{ percentage }}%" 
+                                                aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                                {{ percentage }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{{ url_for('budgets.edit_budget', id=budget.id) }}" class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ budget.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                        
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ budget.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ budget.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ budget.id }}">Confirmar Exclusão</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Tem certeza que deseja excluir o orçamento para "{{ budget.category_name }}" no valor de R$ {{ budget.amount }}?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <a href="{{ url_for('budgets.delete_budget', id=budget.id) }}" class="btn btn-danger">Excluir</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Nenhum orçamento encontrado.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Comparativo de Orçamentos</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="budgetChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Budget Comparison Chart
+        const budgets = {{ budgets|tojson }};
+        
+        if (budgets.length > 0) {
+            const categories = budgets.map(budget => budget.category_name);
+            const budgetAmounts = budgets.map(budget => budget.amount);
+            const spentAmounts = budgets.map(budget => budget.spent || 0);
+            
+            const budgetChart = new Chart(
+                document.getElementById('budgetChart'),
+                {
+                    type: 'bar',
+                    data: {
+                        labels: categories,
+                        datasets: [
+                            {
+                                label: 'Orçado',
+                                data: budgetAmounts,
+                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Gasto',
+                                data: spentAmounts,
+                                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value;
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Orçado vs. Gasto por Categoria'
+                            }
+                        }
+                    }
+                }
+            );
+        }
+    });
+</script>
+{% endblock %}
